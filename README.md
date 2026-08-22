@@ -179,6 +179,45 @@ Character substitution only happens when no embeddable font is found at all.
 
 ---
 
+## Deploying
+
+The API needs a persistent filesystem and a long-lived process: uploads, conversion and
+download are three separate requests against the same temp directory, conversions run on a
+background queue, and progress streams over SSE. That rules out serverless platforms, where
+each request gets its own short-lived container and its own empty disk.
+
+**Single host (simplest).** Production mode already serves the built client from the API
+process, so one container runs everything:
+
+```bash
+npm install && npm run build && npm start
+```
+
+Works on Railway, Render, Fly.io, or any VPS. Attach a persistent volume at `STORAGE_DIR`
+(a fresh disk on each deploy is fine - files expire within the hour anyway) and set
+`NODE_ENV=production`.
+
+**Split: client on Vercel, API elsewhere.** `vercel.json` at the repo root configures the
+client build. Import the repo into Vercel and leave every build setting on default - the
+committed config supplies them. Then set one environment variable in Vercel:
+
+```
+VITE_API_URL = https://your-api-host.example.com
+```
+
+It is read at build time, so redeploy after changing it. On the API host, add the Vercel
+domain to `CORS_ORIGIN`:
+
+```
+CORS_ORIGIN=https://your-project.vercel.app,https://your-custom-domain.com
+```
+
+Do not deploy the API to Vercel. Beyond the missing disk and background queue, the bundled
+FFmpeg binary alone is 80 MB against a 250 MB function limit, and a video conversion will
+outrun the function timeout.
+
+---
+
 ## Security and privacy
 
 - **Type validation by content, not extension.** Every upload is sniffed with `file-type`; a
