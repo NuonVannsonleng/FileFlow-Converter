@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>FileFlow Converter — Convert Anything. Simply.</title>
+    <meta
+      name="description"
+      content="Fast, simple, and reliable file conversion for documents, images, audio, and video. No account required."
+    />
+    <meta name="theme-color" content="#5850ec" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0c0e14" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Khmer:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      // Apply the stored theme before first paint, so there is no light flash
+      // on a dark-mode reload. Kept inline and tiny on purpose.
+      (function () {
+        try {
+          var stored = JSON.parse(localStorage.getItem('fileflow.preferences') || '{}');
+          var mode = (stored.state && stored.state.theme) || 'system';
+          var dark =
+            mode === 'dark' ||
+            (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.classList.toggle('dark', dark);
+          var lang = (stored.state && stored.state.language) || 'en';
+          document.documentElement.lang = lang;
+        } catch (e) {
+          /* Defaults are fine. */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

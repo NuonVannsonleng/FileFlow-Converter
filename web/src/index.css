@@ -1,0 +1,155 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /*
+   * Light theme. Values are space-separated RGB channels so Tailwind can apply
+   * its own alpha via the `<alpha-value>` placeholder.
+   */
+  :root {
+    --c-canvas: 250 250 251;
+    --c-surface: 255 255 255;
+    --c-elevated: 255 255 255;
+    --c-line: 226 229 235;
+    --c-ink: 17 20 28;
+    --c-muted: 90 98 115;
+    --c-faint: 138 146 163;
+    --c-accent: 88 80 236;
+    --c-accent-soft: 238 237 254;
+    --c-accent-ink: 255 255 255;
+    --c-success: 22 145 96;
+    --c-warning: 187 122 14;
+    --c-danger: 205 51 51;
+    --c-shadow: 15 23 42;
+
+    color-scheme: light;
+  }
+
+  /*
+   * Dark theme: a genuinely separate palette. Surfaces lift away from the canvas
+   * instead of relying on shadows, which barely register on dark backgrounds.
+   */
+  .dark {
+    --c-canvas: 12 14 20;
+    --c-surface: 21 24 33;
+    --c-elevated: 28 32 43;
+    --c-line: 45 51 65;
+    --c-ink: 237 240 246;
+    --c-muted: 158 166 184;
+    --c-faint: 116 124 143;
+    --c-accent: 138 132 250;
+    --c-accent-soft: 39 38 72;
+    --c-accent-ink: 14 15 24;
+    --c-success: 60 190 130;
+    --c-warning: 224 168 62;
+    --c-danger: 244 110 110;
+    --c-shadow: 0 0 0;
+
+    color-scheme: dark;
+  }
+
+  * {
+    @apply border-line;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-canvas text-ink font-sans antialiased;
+    /* Prevents the page shifting sideways when a modal locks scrolling. */
+    overflow-x: hidden;
+  }
+
+  /* Khmer needs a taller line box than Latin to avoid clipped diacritics. */
+  html[lang='km'] body {
+    @apply font-khmer;
+    line-height: 1.75;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-canvas;
+  }
+
+  /* Keep the focus ring for keyboard users without drawing it on mouse clicks. */
+  :focus:not(:focus-visible) {
+    @apply outline-none;
+  }
+
+  ::selection {
+    @apply bg-accent/20;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-card border border-line bg-surface shadow-soft;
+  }
+
+  .container-page {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Screen-reader-only text that becomes visible when focused (skip links). */
+  .sr-only-focusable:not(:focus) {
+    @apply sr-only;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .grid-noise {
+    background-image:
+      linear-gradient(to right, rgb(var(--c-line) / 0.6) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(var(--c-line) / 0.6) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  /* Fades a decorative layer out towards the edges of its box. */
+  .mask-radial {
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, #000 40%, transparent 100%);
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, #000 40%, transparent 100%);
+  }
+}
+
+/*
+ * Honour the OS reduced-motion setting: collapse every animation and transition
+ * to something instant, so the app stays fully usable without motion.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Scrollbars that match the theme rather than punching a hole in it. */
+@supports selector(::-webkit-scrollbar) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--c-line));
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(var(--c-faint));
+    background-clip: content-box;
+  }
+}
