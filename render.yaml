@@ -1,0 +1,46 @@
+# Render blueprint: one web service running the API and the built client together.
+#
+# Free instances have no persistent disk, so `storage/` lives only for the
+# lifetime of the container. That suits this app - uploads are deleted as soon
+# as a job finishes and converted files expire within the hour anyway - but a
+# spin-down or redeploy wipes anything not yet downloaded. The app already
+# handles that: the download returns a friendly "expired" message rather than
+# an error page.
+services:
+  - type: web
+    name: fileflow-converter
+    runtime: node
+    plan: free
+    # Singapore is the closest region to South-East Asia; see Render's region
+    # list if you are serving somewhere else.
+    region: singapore
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+
+      # Free instances are memory- and CPU-constrained, so run one conversion at
+      # a time and keep uploads modest. Raise both on a paid instance.
+      - key: QUEUE_CONCURRENCY
+        value: "1"
+      - key: MAX_FILE_SIZE_MB
+        value: "50"
+      - key: MAX_FILES_PER_BATCH
+        value: "10"
+
+      # A free service sleeps after 15 minutes idle and loses its filesystem, so
+      # promising an hour would be dishonest.
+      - key: FILE_TTL_MINUTES
+        value: "20"
+      - key: CLEANUP_INTERVAL_MINUTES
+        value: "5"
+
+      # The client is served from this same origin, so no cross-origin hop.
+      # Only set this if you host the client separately (e.g. on Vercel).
+      # - key: CORS_ORIGIN
+      #   value: https://your-project.vercel.app

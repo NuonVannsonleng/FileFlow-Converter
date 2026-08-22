@@ -193,9 +193,15 @@ process, so one container runs everything:
 npm install && npm run build && npm start
 ```
 
-Works on Railway, Render, Fly.io, or any VPS. Attach a persistent volume at `STORAGE_DIR`
-(a fresh disk on each deploy is fine - files expire within the hour anyway) and set
-`NODE_ENV=production`.
+Works on Render, Railway, Fly.io, or any VPS. `render.yaml` at the repo root is a ready
+blueprint for Render's free tier - point Render at the repo and it reads every setting from
+that file.
+
+Free instances have no persistent disk, which this app tolerates: uploads are deleted as soon
+as a job finishes, and converted files expire within the hour regardless. A spin-down or
+redeploy clears anything not yet downloaded, and the download then reports "expired" rather
+than failing. A free service also sleeps after 15 minutes idle, so the first request after a
+quiet spell waits about a minute for the container to wake.
 
 **Split: client on Vercel, API elsewhere.** `vercel.json` at the repo root configures the
 client build. Import the repo into Vercel and leave every build setting on default - the
