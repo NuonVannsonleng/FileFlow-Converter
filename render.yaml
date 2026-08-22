@@ -14,7 +14,9 @@ services:
     # Singapore is the closest region to South-East Asia; see Render's region
     # list if you are serving somewhere else.
     region: singapore
-    buildCommand: npm install && npm run build
+    # --include=dev is required: NODE_ENV=production below makes npm skip
+    # devDependencies, and the build tools (tsup, vite, typescript) live there.
+    buildCommand: npm install --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
     autoDeployTrigger: commit
